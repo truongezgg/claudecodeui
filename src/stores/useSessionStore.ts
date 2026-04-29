@@ -270,9 +270,43 @@ export function useSessionStore() {
   /**
    * Append a realtime (WebSocket) message to the correct session slot.
    * This works regardless of which session is actively viewed.
+   *
+   * When a server-confirmed user message arrives (non-local ID), it replaces
+   * the local optimistic placeholder added by addMessage, preventing duplicates.
    */
   const appendRealtime = useCallback((sessionId: string, msg: NormalizedMessage) => {
     const slot = getSlot(sessionId);
+
+    // When the server echoes back a user message, replace the local optimistic
+    // placeholder so we never show two copies of the same message.
+    // Strategy: prefer local_* ID + content match (most precise), fall back to
+    // the last realtime user message with the same content (catches edge cases).
+    if (msg.kind === 'text' && msg.role === 'user' && msg.id && !msg.id.startsWith('local_')) {
+      let matchIdx = slot.realtimeMessages.findIndex(
+        m => m.id.startsWith('local_') && m.kind === 'text' && m.role === 'user' && m.content === msg.content,
+      );
+
+      if (matchIdx < 0) {
+        // Fallback: find the last user message with the same content
+        for (let i = slot.realtimeMessages.length - 1; i >= 0; i--) {
+          const m = slot.realtimeMessages[i];
+          if (m.kind === 'text' && m.role === 'user' && m.content === msg.content) {
+            matchIdx = i;
+            break;
+          }
+        }
+      }
+
+      if (matchIdx >= 0) {
+        const updated = [...slot.realtimeMessages];
+        updated[matchIdx] = msg;
+        slot.realtimeMessages = updated;
+        recomputeMergedIfNeeded(slot);
+        notify(sessionId);
+        return;
+      }
+    }
+
     let updated = [...slot.realtimeMessages, msg];
     if (updated.length > MAX_REALTIME_MESSAGES) {
       updated = updated.slice(-MAX_REALTIME_MESSAGES);

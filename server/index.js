@@ -1508,6 +1508,9 @@ function handleChatConnection(ws, request) {
                         data: pending
                     });
                 }
+            } else if (data.type === 'ping') {
+                // Keepalive ping from client — respond so the client knows we're alive
+                writer.send({ type: 'pong' });
             } else if (data.type === 'get-active-sessions') {
                 // Get all currently active sessions
                 const activeSessions = {
@@ -1520,6 +1523,8 @@ function handleChatConnection(ws, request) {
                     type: 'active-sessions',
                     sessions: activeSessions
                 });
+            } else if (data.type === 'ping') {
+                writer.send({ type: 'pong' });
             }
         } catch (error) {
             console.error('[ERROR] Chat WebSocket error:', error.message);
