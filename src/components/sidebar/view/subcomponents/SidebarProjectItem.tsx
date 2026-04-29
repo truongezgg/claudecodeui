@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Check, ChevronDown, ChevronRight, Edit3, Folder, FolderOpen, Star, Trash2, X } from 'lucide-react';
 import type { TFunction } from 'i18next';
 import { Button } from '../../../../shared/view/ui';
@@ -20,7 +21,6 @@ type SidebarProjectItemProps = {
   sessions: SessionWithProvider[];
   initialSessionsLoaded: boolean;
   isLoadingSessions: boolean;
-  currentTime: Date;
   editingSession: string | null;
   editingSessionName: string;
   tasksEnabled: boolean;
@@ -58,7 +58,7 @@ const getSessionCountDisplay = (sessions: SessionWithProvider[], hasMoreSessions
   return `${sessionCount}`;
 };
 
-export default function SidebarProjectItem({
+function SidebarProjectItem({
   project,
   selectedProject,
   selectedSession,
@@ -70,7 +70,6 @@ export default function SidebarProjectItem({
   sessions,
   initialSessionsLoaded,
   isLoadingSessions,
-  currentTime,
   editingSession,
   editingSessionName,
   tasksEnabled,
@@ -410,7 +409,6 @@ export default function SidebarProjectItem({
         selectedSession={selectedSession}
         initialSessionsLoaded={initialSessionsLoaded}
         isLoadingSessions={isLoadingSessions}
-        currentTime={currentTime}
         editingSession={editingSession}
         editingSessionName={editingSessionName}
         onEditingSessionNameChange={onEditingSessionNameChange}
@@ -427,3 +425,5 @@ export default function SidebarProjectItem({
     </div>
   );
 }
+
+export default memo(SidebarProjectItem);

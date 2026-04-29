@@ -98,7 +98,6 @@ export function useSidebarController({
   const [loadingSessions, setLoadingSessions] = useState<LoadingSessionsByProject>({});
   const [additionalSessions, setAdditionalSessions] = useState<AdditionalSessionsByProject>({});
   const [initialSessionsLoaded, setInitialSessionsLoaded] = useState<Set<string>>(new Set());
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [projectSortOrder, setProjectSortOrder] = useState<ProjectSortOrder>('name');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [projectHasMoreOverrides, setProjectHasMoreOverrides] = useState<Record<string, boolean>>({});
@@ -119,14 +118,6 @@ export function useSidebarController({
   const eventSourceRef = useRef<EventSource | null>(null);
 
   const isSidebarCollapsed = !isMobile && !sidebarVisible;
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     setAdditionalSessions({});
@@ -588,7 +579,6 @@ export function useSidebarController({
     loadingSessions,
     additionalSessions,
     initialSessionsLoaded,
-    currentTime,
     projectSortOrder,
     isRefreshing,
     editingSession,

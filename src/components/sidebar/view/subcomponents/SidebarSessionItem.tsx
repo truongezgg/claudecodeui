@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Check, Clock, Edit2, Trash2, X } from 'lucide-react';
 import type { TFunction } from 'i18next';
 import { Badge, Button } from '../../../../shared/view/ui';
@@ -6,13 +7,13 @@ import { formatTimeAgo } from '../../../../utils/dateUtils';
 import type { Project, ProjectSession, LLMProvider } from '../../../../types/app';
 import type { SessionWithProvider } from '../../types/types';
 import { createSessionViewModel } from '../../utils/utils';
+import { useRelativeTime } from '../../contexts/RelativeTimeContext';
 import SessionProviderLogo from '../../../llm-logo-provider/SessionProviderLogo';
 
 type SidebarSessionItemProps = {
   project: Project;
   session: SessionWithProvider;
   selectedSession: ProjectSession | null;
-  currentTime: Date;
   editingSession: string | null;
   editingSessionName: string;
   onEditingSessionNameChange: (value: string) => void;
@@ -30,11 +31,10 @@ type SidebarSessionItemProps = {
   t: TFunction;
 };
 
-export default function SidebarSessionItem({
+function SidebarSessionItem({
   project,
   session,
   selectedSession,
-  currentTime,
   editingSession,
   editingSessionName,
   onEditingSessionNameChange,
@@ -46,6 +46,7 @@ export default function SidebarSessionItem({
   onDeleteSession,
   t,
 }: SidebarSessionItemProps) {
+  const currentTime = useRelativeTime();
   const sessionView = createSessionViewModel(session, currentTime, t);
   const isSelected = selectedSession?.id === session.id;
 
@@ -229,3 +230,5 @@ export default function SidebarSessionItem({
     </div>
   );
 }
+
+export default memo(SidebarSessionItem);

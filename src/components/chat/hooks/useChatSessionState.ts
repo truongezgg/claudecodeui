@@ -131,6 +131,16 @@ export function useChatSessionState({
   const loadAllFinishedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadAllOverlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastLoadedSessionKeyRef = useRef<string | null>(null);
+  const selectedProjectRef = useRef<Project | null>(selectedProject);
+  const selectedSessionRef = useRef<ProjectSession | null>(selectedSession);
+  const currentSessionIdRef = useRef<string | null>(currentSessionId);
+  useLayoutEffect(() => {
+    selectedProjectRef.current = selectedProject;
+    selectedSessionRef.current = selectedSession;
+  });
+  useLayoutEffect(() => {
+    currentSessionIdRef.current = currentSessionId;
+  });
 
   const createDiff = useMemo<DiffCalculator>(() => createCachedDiffCalculator(), []);
 
@@ -308,7 +318,10 @@ export function useChatSessionState({
 
   // Main session loading effect — store-based
   useEffect(() => {
-    if (!selectedSession || !selectedProject) {
+    const proj = selectedProjectRef.current;
+    const sess = selectedSessionRef.current;
+
+    if (!sess || !proj) {
       resetStreamingState();
       pendingViewSessionRef.current = null;
       setClaudeStatus(null);
@@ -324,15 +337,25 @@ export function useChatSessionState({
       return;
     }
 
-    const provider = (selectedSession.__provider || localStorage.getItem('selected-provider') as Provider) || 'claude';
-    const sessionKey = `${selectedSession.id}:${selectedProject.name}:${provider}`;
+    const provider = (sess.__provider || localStorage.getItem('selected-provider') as Provider) || 'claude';
+    const sessionKey = `${sess.id}:${proj.name}:${provider}`;
+    const sameKey = lastLoadedSessionKeyRef.current === sessionKey;
 
-    // Skip if already loaded and fresh
-    if (lastLoadedSessionKeyRef.current === sessionKey && sessionStore.has(selectedSession.id) && !sessionStore.isStale(selectedSession.id)) {
+    // Hot path: same session/project as before AND store already has data.
+    // Do a silent refresh when stale — no loading flip, no pagination/scroll reset.
+    if (sameKey && sessionStore.has(sess.id)) {
+      if (sessionStore.isStale(sess.id)) {
+        void sessionStore.refreshFromServer(sess.id, {
+          provider: (sess.__provider || provider) as LLMProvider,
+          projectName: proj.name,
+          projectPath: proj.fullPath || proj.path || '',
+        });
+      }
       return;
     }
 
-    const sessionChanged = currentSessionId !== null && currentSessionId !== selectedSession.id;
+    const prevSessionId = currentSessionIdRef.current;
+    const sessionChanged = prevSessionId !== null && prevSessionId !== sess.id;
     if (sessionChanged) {
       resetStreamingState();
       pendingViewSessionRef.current = null;
@@ -359,24 +382,24 @@ export function useChatSessionState({
       setIsLoading(false);
     }
 
-    setCurrentSessionId(selectedSession.id);
+    setCurrentSessionId(sess.id);
     if (provider === 'cursor') {
-      sessionStorage.setItem('cursorSessionId', selectedSession.id);
+      sessionStorage.setItem('cursorSessionId', sess.id);
     }
 
     // Check session status
     if (ws) {
-      sendMessage({ type: 'check-session-status', sessionId: selectedSession.id, provider });
+      sendMessage({ type: 'check-session-status', sessionId: sess.id, provider });
     }
 
     lastLoadedSessionKeyRef.current = sessionKey;
 
     // Fetch from server → store updates → chatMessages re-derives automatically
     setIsLoadingSessionMessages(true);
-    sessionStore.fetchFromServer(selectedSession.id, {
-      provider: (selectedSession.__provider || provider) as LLMProvider,
-      projectName: selectedProject.name,
-      projectPath: selectedProject.fullPath || selectedProject.path || '',
+    sessionStore.fetchFromServer(sess.id, {
+      provider: (sess.__provider || provider) as LLMProvider,
+      projectName: proj.name,
+      projectPath: proj.fullPath || proj.path || '',
       limit: MESSAGES_PER_PAGE,
       offset: 0,
     }).then(slot => {
@@ -392,8 +415,11 @@ export function useChatSessionState({
   }, [
     pendingViewSessionRef,
     resetStreamingState,
-    selectedProject,
+    selectedProject?.name,
+    selectedProject?.fullPath,
+    selectedProject?.path,
     selectedSession?.id,
+    selectedSession?.__provider,
     sendMessage,
     ws,
     sessionStore,
@@ -401,7 +427,9 @@ export function useChatSessionState({
 
   // External message update (e.g. WebSocket reconnect, background refresh)
   useEffect(() => {
-    if (!externalMessageUpdate || !selectedSession || !selectedProject) return;
+    const proj = selectedProjectRef.current;
+    const sess = selectedSessionRef.current;
+    if (!externalMessageUpdate || !sess || !proj) return;
 
     const reloadExternalMessages = async () => {
       try {
@@ -409,10 +437,10 @@ export function useChatSessionState({
 
         // Skip store refresh during active streaming
         if (!isLoading) {
-          await sessionStore.refreshFromServer(selectedSession.id, {
-            provider: (selectedSession.__provider || provider) as LLMProvider,
-            projectName: selectedProject.name,
-            projectPath: selectedProject.fullPath || selectedProject.path || '',
+          await sessionStore.refreshFromServer(sess.id, {
+            provider: (sess.__provider || provider) as LLMProvider,
+            projectName: proj.name,
+            projectPath: proj.fullPath || proj.path || '',
           });
 
           if (Boolean(autoScrollToBottom) && isNearBottom()) {
@@ -430,8 +458,11 @@ export function useChatSessionState({
     externalMessageUpdate,
     isNearBottom,
     scrollToBottom,
-    selectedProject,
-    selectedSession,
+    selectedProject?.name,
+    selectedProject?.fullPath,
+    selectedProject?.path,
+    selectedSession?.id,
+    selectedSession?.__provider,
     sessionStore,
     isLoading,
   ]);

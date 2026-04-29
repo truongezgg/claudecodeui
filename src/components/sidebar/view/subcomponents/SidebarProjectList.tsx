@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import type { TFunction } from 'i18next';
 import type { LoadingProgress, Project, ProjectSession, LLMProvider } from '../../../../types/app';
 import type {
@@ -21,7 +21,6 @@ export type SidebarProjectListProps = {
   editingName: string;
   loadingSessions: LoadingSessionsByProject;
   initialSessionsLoaded: Set<string>;
-  currentTime: Date;
   editingSession: string | null;
   editingSessionName: string;
   deletingProjects: Set<string>;
@@ -53,7 +52,7 @@ export type SidebarProjectListProps = {
   t: TFunction;
 };
 
-export default function SidebarProjectList({
+function SidebarProjectList({
   projects,
   filteredProjects,
   selectedProject,
@@ -65,7 +64,6 @@ export default function SidebarProjectList({
   editingName,
   loadingSessions,
   initialSessionsLoaded,
-  currentTime,
   editingSession,
   editingSessionName,
   deletingProjects,
@@ -101,14 +99,15 @@ export default function SidebarProjectList({
     />
   );
 
+  const selectedDisplayName = selectedProject?.displayName;
   useEffect(() => {
     let baseTitle = 'CloudCLI UI';
-    const displayName = selectedProject?.displayName?.trim();
+    const displayName = selectedDisplayName?.trim();
     if (displayName) {
       baseTitle = `${displayName} - ${baseTitle}`;
     }
     document.title = baseTitle;
-  }, [selectedProject]);
+  }, [selectedDisplayName]);
 
   const showProjects = !isLoading && projects.length > 0 && filteredProjects.length > 0;
 
@@ -130,7 +129,6 @@ export default function SidebarProjectList({
               sessions={getProjectSessions(project)}
               initialSessionsLoaded={initialSessionsLoaded.has(project.name)}
               isLoadingSessions={Boolean(loadingSessions[project.name])}
-              currentTime={currentTime}
               editingSession={editingSession}
               editingSessionName={editingSessionName}
               tasksEnabled={tasksEnabled}
@@ -157,3 +155,5 @@ export default function SidebarProjectList({
     </div>
   );
 }
+
+export default memo(SidebarProjectList);

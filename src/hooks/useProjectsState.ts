@@ -108,6 +108,43 @@ const isUpdateAdditive = (
   );
 };
 
+const sessionsFingerprint = (sessions: ProjectSession[] | undefined): string => {
+  if (!sessions || sessions.length === 0) return '';
+  let out = '';
+  for (const s of sessions) {
+    out += `${s.id}|${s.updated_at ?? ''};`;
+  }
+  return out;
+};
+
+const selectedProjectNeedsUpdate = (current: Project, next: Project): boolean => {
+  if (
+    current.name !== next.name ||
+    current.displayName !== next.displayName ||
+    current.fullPath !== next.fullPath ||
+    current.path !== next.path
+  ) {
+    return true;
+  }
+
+  return (
+    sessionsFingerprint(current.sessions) !== sessionsFingerprint(next.sessions) ||
+    sessionsFingerprint(current.codexSessions) !== sessionsFingerprint(next.codexSessions) ||
+    sessionsFingerprint(current.cursorSessions) !== sessionsFingerprint(next.cursorSessions) ||
+    sessionsFingerprint(current.geminiSessions) !== sessionsFingerprint(next.geminiSessions)
+  );
+};
+
+const selectedSessionNeedsUpdate = (current: ProjectSession, next: ProjectSession): boolean => {
+  return (
+    current.id !== next.id ||
+    current.title !== next.title ||
+    current.created_at !== next.created_at ||
+    current.updated_at !== next.updated_at ||
+    current.__provider !== next.__provider
+  );
+};
+
 const VALID_TABS: Set<string> = new Set(['chat', 'files', 'shell', 'git', 'tasks', 'preview']);
 
 const isValidTab = (tab: string): tab is AppTab => {
@@ -263,7 +300,9 @@ export function useProjectsState({
       return;
     }
 
-    setProjects(updatedProjects);
+    if (projectsHaveChanges(projects, updatedProjects, true)) {
+      setProjects(updatedProjects);
+    }
 
     if (!selectedProject) {
       return;
@@ -277,11 +316,16 @@ export function useProjectsState({
       return;
     }
 
-    if (serialize(updatedSelectedProject) !== serialize(selectedProject)) {
+    const projectChanged = selectedProjectNeedsUpdate(selectedProject, updatedSelectedProject);
+    if (projectChanged) {
       setSelectedProject(updatedSelectedProject);
     }
 
     if (!selectedSession) {
+      return;
+    }
+
+    if (!projectChanged) {
       return;
     }
 
@@ -464,7 +508,7 @@ export function useProjectsState({
         return;
       }
 
-      if (serialize(refreshedProject) !== serialize(selectedProject)) {
+      if (selectedProjectNeedsUpdate(selectedProject, refreshedProject)) {
         setSelectedProject(refreshedProject);
       }
 
@@ -483,7 +527,7 @@ export function useProjectsState({
             ? refreshedSession
             : { ...refreshedSession, __provider: selectedSession.__provider };
 
-        if (serialize(normalizedRefreshedSession) !== serialize(selectedSession)) {
+        if (selectedSessionNeedsUpdate(selectedSession, normalizedRefreshedSession)) {
           setSelectedSession(normalizedRefreshedSession);
         }
       }

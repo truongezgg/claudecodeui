@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { ChevronDown, Plus } from 'lucide-react';
 import type { TFunction } from 'i18next';
 import { Button } from '../../../../shared/view/ui';
@@ -12,7 +13,6 @@ type SidebarProjectSessionsProps = {
   selectedSession: ProjectSession | null;
   initialSessionsLoaded: boolean;
   isLoadingSessions: boolean;
-  currentTime: Date;
   editingSession: string | null;
   editingSessionName: string;
   onEditingSessionNameChange: (value: string) => void;
@@ -50,14 +50,13 @@ function SessionListSkeleton() {
   );
 }
 
-export default function SidebarProjectSessions({
+function SidebarProjectSessions({
   project,
   isExpanded,
   sessions,
   selectedSession,
   initialSessionsLoaded,
   isLoadingSessions,
-  currentTime,
   editingSession,
   editingSessionName,
   onEditingSessionNameChange,
@@ -116,7 +115,6 @@ export default function SidebarProjectSessions({
             project={project}
             session={session}
             selectedSession={selectedSession}
-            currentTime={currentTime}
             editingSession={editingSession}
             editingSessionName={editingSessionName}
             onEditingSessionNameChange={onEditingSessionNameChange}
@@ -155,3 +153,5 @@ export default function SidebarProjectSessions({
     </div>
   );
 }
+
+export default memo(SidebarProjectSessions);

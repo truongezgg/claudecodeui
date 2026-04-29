@@ -22,6 +22,11 @@ import { createNormalizedMessage } from './shared/utils.js';
 // Track active sessions
 const activeCodexSessions = new Map();
 
+const CODEX_CONTEXT_WINDOWS = {
+  'gpt-5.5': 400000,
+  'gpt-5.4': 1050000,
+};
+
 /**
  * Transform Codex SDK event to WebSocket message format
  * @param {object} event - SDK event
@@ -284,7 +289,8 @@ export async function queryCodex(command, options = {}, ws) {
       // Extract and send token usage if available (normalized to match Claude format)
       if (event.type === 'turn.completed' && event.usage) {
         const totalTokens = (event.usage.input_tokens || 0) + (event.usage.output_tokens || 0);
-        sendMessage(ws, createNormalizedMessage({ kind: 'status', text: 'token_budget', tokenBudget: { used: totalTokens, total: 200000 }, sessionId: currentSessionId, provider: 'codex' }));
+        const modelContextWindow = CODEX_CONTEXT_WINDOWS[model] || 200000;
+        sendMessage(ws, createNormalizedMessage({ kind: 'status', text: 'token_budget', tokenBudget: { used: totalTokens, total: modelContextWindow }, sessionId: currentSessionId, provider: 'codex' }));
       }
     }
 
