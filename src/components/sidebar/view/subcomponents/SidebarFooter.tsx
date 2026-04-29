@@ -139,46 +139,35 @@ export default function SidebarFooter({
         </div>
       )}
 
-      {/* Mobile Report Issue */}
-      <div className="px-3 pt-3 md:hidden">
+      {/* Mobile compact action row: Report / Discord / Settings */}
+      <div className="flex items-center gap-2 px-3 pb-3 pt-3 md:hidden">
         <a
           href={GITHUB_ISSUES_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex h-12 w-full items-center gap-3.5 rounded-xl bg-muted/40 px-4 transition-all hover:bg-muted/60 active:scale-[0.98]"
+          aria-label={t('actions.reportIssue')}
+          title={t('actions.reportIssue')}
+          className="flex h-11 flex-1 items-center justify-center rounded-xl bg-muted/40 transition-all hover:bg-muted/60 active:scale-[0.98]"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-background/80">
-            <Bug className="w-4.5 h-4.5 text-muted-foreground" />
-          </div>
-          <span className="text-base font-medium text-foreground">{t('actions.reportIssue')}</span>
+          <Bug className="w-4.5 h-4.5 text-muted-foreground" />
         </a>
-      </div>
-
-      {/* Mobile Discord */}
-      <div className="px-3 pt-2 md:hidden">
         <a
           href={DISCORD_INVITE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex h-12 w-full items-center gap-3.5 rounded-xl bg-muted/40 px-4 transition-all hover:bg-muted/60 active:scale-[0.98]"
+          aria-label={t('actions.joinCommunity')}
+          title={t('actions.joinCommunity')}
+          className="flex h-11 flex-1 items-center justify-center rounded-xl bg-muted/40 transition-all hover:bg-muted/60 active:scale-[0.98]"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-background/80">
-            <DiscordIcon className="w-4.5 h-4.5 text-muted-foreground" />
-          </div>
-          <span className="text-base font-medium text-foreground">{t('actions.joinCommunity')}</span>
+          <DiscordIcon className="w-4.5 h-4.5 text-muted-foreground" />
         </a>
-      </div>
-
-      {/* Mobile settings */}
-      <div className="px-3 pb-3 pt-2 md:hidden">
         <button
-          className="flex h-12 w-full items-center gap-3.5 rounded-xl bg-muted/40 px-4 transition-all hover:bg-muted/60 active:scale-[0.98]"
+          aria-label={t('actions.settings')}
+          title={t('actions.settings')}
+          className="flex h-11 flex-1 items-center justify-center rounded-xl bg-muted/40 transition-all hover:bg-muted/60 active:scale-[0.98]"
           onClick={onShowSettings}
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-background/80">
-            <Settings className="w-4.5 h-4.5 text-muted-foreground" />
-          </div>
-          <span className="text-base font-medium text-foreground">{t('actions.settings')}</span>
+          <Settings className="w-4.5 h-4.5 text-muted-foreground" />
         </button>
       </div>
     </div>
