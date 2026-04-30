@@ -218,7 +218,10 @@ export async function queryCodex(command, options = {}, ws) {
 
   try {
     // Initialize Codex SDK
-    codex = new Codex();
+    // Use the system-wide codex CLI (e.g. /usr/bin/codex) when present so the
+    // version matches what users see on the server shell, instead of the
+    // older binary bundled with @openai/codex-sdk in node_modules.
+    codex = new Codex({ codexPathOverride: process.env.CODEX_CLI_PATH || '/usr/bin/codex' });
 
     // Thread options with sandbox and approval settings
     const threadOptions = {

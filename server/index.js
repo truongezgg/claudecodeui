@@ -419,6 +419,65 @@ app.post('/api/system/update', authenticateToken, async (req, res) => {
     }
 });
 
+// Codex SDK version check — reports the locally installed @openai/codex-sdk
+// version vs the latest published on npm so the UI can prompt for an upgrade.
+const codexSdkVersionCache = { value: null, fetchedAt: 0 };
+const CODEX_SDK_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+app.get('/api/codex/sdk-version', authenticateToken, async (req, res) => {
+    try {
+        const sdkPkgPath = path.join(APP_ROOT, 'node_modules', '@openai', 'codex-sdk', 'package.json');
+        let currentVersion = null;
+        try {
+            const sdkPkg = JSON.parse(await fsPromises.readFile(sdkPkgPath, 'utf8'));
+            currentVersion = sdkPkg.version || null;
+        } catch {
+            // SDK not installed locally; treat as unknown
+        }
+
+        const now = Date.now();
+        if (!codexSdkVersionCache.value || now - codexSdkVersionCache.fetchedAt > CODEX_SDK_CACHE_TTL_MS) {
+            try {
+                const response = await fetch('https://registry.npmjs.org/@openai/codex-sdk/latest', {
+                    headers: { Accept: 'application/json' }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    codexSdkVersionCache.value = data.version || null;
+                    codexSdkVersionCache.fetchedAt = now;
+                }
+            } catch (err) {
+                console.warn('Codex SDK version fetch failed:', err.message);
+            }
+        }
+
+        const latestVersion = codexSdkVersionCache.value;
+        const updateAvailable = !!(currentVersion && latestVersion && compareSemver(latestVersion, currentVersion) > 0);
+
+        res.json({
+            packageName: '@openai/codex-sdk',
+            currentVersion,
+            latestVersion,
+            updateAvailable,
+            upgradeCommand: 'npm install @openai/codex-sdk@latest'
+        });
+    } catch (error) {
+        console.error('Codex SDK version check error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+function compareSemver(a, b) {
+    const pa = String(a).split('.').map(n => parseInt(n, 10) || 0);
+    const pb = String(b).split('.').map(n => parseInt(n, 10) || 0);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+        const da = pa[i] || 0;
+        const db = pb[i] || 0;
+        if (da !== db) return da - db;
+    }
+    return 0;
+}
+
 app.get('/api/projects', authenticateToken, async (req, res) => {
     try {
         const projects = await getProjects(broadcastProgress);

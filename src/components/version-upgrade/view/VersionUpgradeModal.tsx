@@ -4,6 +4,7 @@ import { authenticatedFetch } from "../../../utils/api";
 import { ReleaseInfo } from "../../../types/sharedTypes";
 import { copyTextToClipboard } from "../../../utils/clipboard";
 import type { InstallMode } from "../../../hooks/useVersionCheck";
+import type { CodexSdkVersionInfo } from "../../../hooks/useCodexSdkVersionCheck";
 import { IS_PLATFORM } from "../../../constants/config";
 
 interface VersionUpgradeModalProps {
@@ -13,6 +14,7 @@ interface VersionUpgradeModalProps {
     currentVersion: string;
     latestVersion: string | null;
     installMode: InstallMode;
+    codexSdkInfo?: CodexSdkVersionInfo | null;
 }
 
 const RELOAD_COUNTDOWN_START = 30;
@@ -23,7 +25,8 @@ export function VersionUpgradeModal({
     releaseInfo,
     currentVersion,
     latestVersion,
-    installMode
+    installMode,
+    codexSdkInfo
 }: VersionUpgradeModalProps) {
     const { t } = useTranslation('common');
     const upgradeCommand = installMode === 'npm'
@@ -133,6 +136,36 @@ export function VersionUpgradeModal({
                         <span className="font-mono text-sm text-blue-900 dark:text-blue-100">{latestVersion}</span>
                     </div>
                 </div>
+
+                {/* Codex SDK Version Info */}
+                {codexSdkInfo?.updateAvailable && codexSdkInfo.currentVersion && codexSdkInfo.latestVersion && (
+                    <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700/50 dark:bg-amber-900/10">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                                {t('versionUpdate.codexSdk.title', { defaultValue: 'Codex SDK update available' })}
+                            </h3>
+                            <span className="font-mono text-xs text-amber-800 dark:text-amber-300">
+                                {codexSdkInfo.currentVersion} → {codexSdkInfo.latestVersion}
+                            </span>
+                        </div>
+                        <p className="text-xs text-amber-800 dark:text-amber-300">
+                            {t('versionUpdate.codexSdk.description', {
+                                defaultValue: 'A newer version of @openai/codex-sdk is published on npm. Run the command below to upgrade, then restart the server.'
+                            })}
+                        </p>
+                        <div className="flex items-center gap-2">
+                            <code className="flex-1 truncate rounded-md border bg-white px-2 py-1.5 font-mono text-xs text-gray-800 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
+                                {codexSdkInfo.upgradeCommand}
+                            </code>
+                            <button
+                                onClick={() => copyTextToClipboard(codexSdkInfo.upgradeCommand)}
+                                className="rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
+                            >
+                                {t('versionUpdate.buttons.copyCommand')}
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Changelog */}
                 {releaseInfo?.body && (

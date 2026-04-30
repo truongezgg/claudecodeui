@@ -263,6 +263,10 @@
       "settings": "Settings",
       "updateAvailable": "Update available",
       "closeSidebar": "Close sidebar"
+    },
+    "codexSdk": {
+      "title": "Codex SDK update available",
+      "description": "A newer version of @openai/codex-sdk is published on npm. Run the command below to upgrade, then restart the server."
     }
   }
 }

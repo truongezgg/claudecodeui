@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDeviceSettings } from '../../../hooks/useDeviceSettings';
 import { useVersionCheck } from '../../../hooks/useVersionCheck';
+import { useCodexSdkVersionCheck } from '../../../hooks/useCodexSdkVersionCheck';
 import { useUiPreferences } from '../../../hooks/useUiPreferences';
 import { useSidebarController } from '../hooks/useSidebarController';
 import { useTaskMaster } from '../../../contexts/TaskMasterContext';
@@ -39,10 +40,12 @@ function Sidebar({
 }: SidebarProps) {
   const { t } = useTranslation(['sidebar', 'common']);
   const { isPWA } = useDeviceSettings({ trackMobile: false });
-  const { updateAvailable, latestVersion, currentVersion, releaseInfo, installMode } = useVersionCheck(
+  const { updateAvailable: appUpdateAvailable, latestVersion, currentVersion, releaseInfo, installMode } = useVersionCheck(
     'siteboon',
     'claudecodeui',
   );
+  const codexSdkInfo = useCodexSdkVersionCheck();
+  const updateAvailable = appUpdateAvailable || !!codexSdkInfo?.updateAvailable;
   const { preferences, setPreference } = useUiPreferences();
   const { sidebarVisible } = preferences;
   const { setCurrentProject, mcpServerStatus } = useTaskMaster() as TaskMasterSidebarContext;
@@ -322,6 +325,7 @@ function Sidebar({
         currentVersion={currentVersion}
         latestVersion={latestVersion}
         installMode={installMode}
+        codexSdkInfo={codexSdkInfo}
         t={t}
       />
 
