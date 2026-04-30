@@ -74,11 +74,11 @@ export default function TokenUsagePie({ used, total }: TokenUsagePieProps) {
         </button>
       </DialogTrigger>
 
-      <DialogContent className="mx-4 max-w-sm p-4">
+      <DialogContent className="mx-4 max-w-xs p-3">
         <DialogTitle className="not-sr-only text-base font-semibold text-foreground">
           {t('tokenUsage.title', { defaultValue: 'Token usage' })}
         </DialogTitle>
-        <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+        <div className="mt-2 space-y-2 text-sm text-muted-foreground">
           <div className="flex justify-between gap-4">
             <span>{t('tokenUsage.used', { defaultValue: 'Used' })}</span>
             <span className="font-medium text-foreground">{used.toLocaleString()}</span>
@@ -96,13 +96,19 @@ export default function TokenUsagePie({ used, total }: TokenUsagePieProps) {
             <span className="font-semibold text-foreground">{percentage.toFixed(1)}%</span>
           </div>
         </div>
-        <button
-          type="button"
-          className="mt-4 w-full rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 active:bg-primary/80"
-          onClick={() => setIsOpen(false)}
-        >
-          {t('tokenUsage.close', { defaultValue: 'Close' })}
-        </button>
+        <div className="mt-3 flex justify-end">
+          <button
+            type="button"
+            className="inline-flex h-8 min-w-16 shrink-0 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring active:bg-primary/80"
+            onPointerDown={(event) => {
+              event.preventDefault();
+              setIsOpen(false);
+            }}
+            onClick={() => setIsOpen(false)}
+          >
+            {t('tokenUsage.close', { defaultValue: 'Close' })}
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   );
