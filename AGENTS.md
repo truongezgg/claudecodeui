@@ -26,7 +26,7 @@ tmux send-keys -t claudecodeui:0 'SERVER_PORT=2233 npm run start' Enter
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **claudecodeui** (6249 symbols, 10401 relationships, 182 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **claudecodeui** (6257 symbols, 10410 relationships, 182 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
