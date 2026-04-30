@@ -266,6 +266,13 @@ export default function Shell({
         disableRestart={isRestarting || isConnected}
       />
 
+      <TerminalShortcutsPanel
+        wsRef={wsRef}
+        terminalRef={terminalRef}
+        isConnected={isConnected}
+        position="static-top"
+      />
+
       <div className="relative flex-1 overflow-hidden p-2">
         <div
           ref={terminalContainerRef}
@@ -287,7 +294,7 @@ export default function Shell({
 
         {cliPromptOptions && isConnected && (
           <div
-            className="absolute inset-x-0 bottom-0 z-10 border-t border-gray-700/80 bg-gray-800/95 px-3 py-2 backdrop-blur-sm"
+            className="absolute inset-x-0 bottom-0 z-30 border-t border-gray-700/80 bg-gray-800/95 px-3 py-2 backdrop-blur-sm"
             onMouseDown={(e) => e.preventDefault()}
           >
             <div className="flex flex-wrap items-center gap-2">
@@ -319,12 +326,6 @@ export default function Shell({
           </div>
         )}
       </div>
-
-      <TerminalShortcutsPanel
-        wsRef={wsRef}
-        terminalRef={terminalRef}
-        isConnected={isConnected}
-      />
 
     </div>
   );

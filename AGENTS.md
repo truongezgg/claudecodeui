@@ -1,7 +1,32 @@
+## Development
+
+### Rebuilding & Restarting the Server
+
+The project runs in a tmux session named **`claudecodeui`** (window 0).
+
+To rebuild and restart after code changes:
+
+```bash
+# Build client + server, then start
+SERVER_PORT=2233 npm run start
+```
+
+- Use `SERVER_PORT` (not `PORT`) to set the port.
+- `npm run start` = `npm run build && npm run server` (full rebuild then serve).
+- For dev mode with hot reload: `SERVER_PORT=2233 npm run dev`
+
+To restart via tmux:
+```bash
+tmux send-keys -t claudecodeui:0 C-c '' && sleep 1
+tmux send-keys -t claudecodeui:0 'SERVER_PORT=2233 npm run start' Enter
+```
+
+---
+
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **claudecodeui** (6198 symbols, 10344 relationships, 183 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **claudecodeui** (6249 symbols, 10401 relationships, 182 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

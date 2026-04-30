@@ -40,6 +40,7 @@ type TerminalShortcutsPanelProps = {
   terminalRef: MutableRefObject<Terminal | null>;
   isConnected: boolean;
   bottomOffset?: string;
+  position?: 'fixed-bottom' | 'static-top';
 };
 
 const preventFocusSteal = (e: React.PointerEvent) => e.preventDefault();
@@ -56,6 +57,7 @@ export default function TerminalShortcutsPanel({
   terminalRef,
   isConnected,
   bottomOffset = 'bottom-0',
+  position = 'fixed-bottom',
 }: TerminalShortcutsPanelProps) {
   const { t } = useTranslation('settings');
   const [ctrlActive, setCtrlActive] = useState(false);
@@ -106,9 +108,17 @@ export default function TerminalShortcutsPanel({
     [ctrlActive, altActive, sendInput],
   );
 
+  const isStaticTop = position === 'static-top';
+  const wrapperClass = isStaticTop
+    ? 'shrink-0 px-2 pt-2 md:hidden'
+    : `pointer-events-none fixed inset-x-0 ${bottomOffset} z-20 px-2 md:hidden`;
+  const innerClass = isStaticTop
+    ? 'flex items-center gap-1 overflow-x-auto border-y border-gray-700/80 bg-gray-900 px-1.5 py-1.5 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:hidden'
+    : 'pointer-events-auto flex items-center gap-1 overflow-x-auto rounded-lg border border-gray-700/80 bg-gray-900/95 px-1.5 py-1.5 shadow-lg backdrop-blur-sm [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:hidden';
+
   return (
-    <div className={`pointer-events-none fixed inset-x-0 ${bottomOffset} z-20 px-2 md:hidden`}>
-      <div className="pointer-events-auto flex items-center gap-1 overflow-x-auto rounded-lg border border-gray-700/80 bg-gray-900/95 px-1.5 py-1.5 shadow-lg backdrop-blur-sm [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className={wrapperClass}>
+      <div className={innerClass}>
         <button
           type="button"
           onPointerDown={preventFocusSteal}

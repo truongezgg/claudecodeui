@@ -145,9 +145,9 @@ function ThinkingModeSelector({ selectedMode, onModeChange, onClose, className =
 
           setIsOpen(true);
         }}
-        className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 sm:h-10 sm:w-10 ${selectedMode === 'none'
-            ? 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600'
-            : 'bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800'
+        className={`flex h-10 w-10 items-center justify-center rounded-full bg-transparent transition-all duration-200 hover:bg-transparent sm:h-10 sm:w-10 ${selectedMode === 'none'
+            ? 'sm:bg-gray-100 sm:hover:bg-gray-200 dark:sm:bg-gray-700 dark:sm:hover:bg-gray-600'
+            : 'sm:bg-blue-100 sm:hover:bg-blue-200 dark:sm:bg-blue-900 dark:sm:hover:bg-blue-800'
           }`}
         title={t('thinkingMode.buttonTitle', { mode: currentMode.name })}
         aria-haspopup="dialog"
